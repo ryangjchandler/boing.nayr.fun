@@ -6,7 +6,7 @@ const numSegments = 360;
 const baseRadius = 0.2;
 const springConstant = 0.15;
 const damping = 0.1;
-const spread = 0.3;
+const spread = 0.6;
 const devicePixelRatioValue = devicePixelRatio || 1;
 const colorVariants = [
   "#3fa9f5", // Original blue
@@ -193,22 +193,24 @@ function updatePhysics() {
     }
   }
   // Always apply spread and smoothing for ripple
-  const spreaded = radii.slice();
-  for (let i = 0; i <= numSegments; i++) {
-    const leftIndex = i === 0 ? numSegments : i - 1;
-    const rightIndex = i === numSegments ? 0 : i + 1;
-    spreaded[i] += spread * (radii[leftIndex] - radii[i] + (radii[rightIndex] - radii[i]));
-  }
-  radii.set(spreaded);
+  for (let iter = 0; iter < 4; iter++) {
+    const spreaded = radii.slice();
+    for (let i = 0; i <= numSegments; i++) {
+      const leftIndex = i === 0 ? numSegments : i - 1;
+      const rightIndex = i === numSegments ? 0 : i + 1;
+      spreaded[i] += spread * (radii[leftIndex] - radii[i] + (radii[rightIndex] - radii[i]));
+    }
+    radii.set(spreaded);
 
-  // Smooth with neighbor averaging
-  const smoothed = radii.slice();
-  for (let i = 0; i <= numSegments; i++) {
-    const leftIndex = i === 0 ? numSegments : i - 1;
-    const rightIndex = i === numSegments ? 0 : i + 1;
-    smoothed[i] = 0.25 * radii[leftIndex] + 0.5 * radii[i] + 0.25 * radii[rightIndex];
+    // Smooth with neighbor averaging
+    const smoothed = radii.slice();
+    for (let i = 0; i <= numSegments; i++) {
+      const leftIndex = i === 0 ? numSegments : i - 1;
+      const rightIndex = i === numSegments ? 0 : i + 1;
+      smoothed[i] = 0.1 * radii[leftIndex] + 0.8 * radii[i] + 0.1 * radii[rightIndex];
+    }
+    radii.set(smoothed);
   }
-  radii.set(smoothed);
   // Clamp radii to prevent negative values
   for (let i = 0; i <= numSegments; i++) {
     radii[i] = Math.max(0, radii[i]);
