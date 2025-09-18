@@ -4,9 +4,9 @@ import fs from './glsl/main.frag'
 // Constants
 const numSegments = 360;
 const baseRadius = 0.2;
-const springConstant = 0.12;
-const damping = 0.16;
-const spread = 0.23;
+const springConstant = 0.15;
+const damping = 0.1;
+const spread = 0.3;
 const devicePixelRatioValue = devicePixelRatio || 1;
 const colorVariants = [
   "#3fa9f5", // Original blue
@@ -129,12 +129,12 @@ function setupEventListeners() {
       const x = (((event.clientX - rect.left) * devicePixelRatioValue) / canvas.width) * 2 - 1;
       const y =
         ((canvas.height - (event.clientY - rect.top) * devicePixelRatioValue) / canvas.height) * 2 - 1;
-      const targetRadius = Math.min(0.95, Math.hypot(x, y));
+      const targetRadius = Math.min(0.3, Math.hypot(x, y));
       const radiusBoost = Math.max(baseRadius, targetRadius);
-      const range = 6;
+      const range = 8;
       for (let offset = -range; offset <= range; offset++) {
         const index = (dragIndex + offset + numSegments + 1) % (numSegments + 1);
-        const falloff = Math.exp(-0.5 * (offset * offset));
+        const falloff = 0.5 * (1 + Math.cos(Math.PI * offset / range));
         radii[index] = baseRadius + (radiusBoost - baseRadius) * falloff;
       }
     }
@@ -159,12 +159,12 @@ function setupEventListeners() {
         const x = (((touch.clientX - rect.left) * devicePixelRatioValue) / canvas.width) * 2 - 1;
         const y =
           ((canvas.height - (touch.clientY - rect.top) * devicePixelRatioValue) / canvas.height) * 2 - 1;
-        const targetRadius = Math.min(0.95, Math.hypot(x, y));
+        const targetRadius = Math.min(0.3, Math.hypot(x, y));
         const radiusBoost = Math.max(baseRadius, targetRadius);
-        const range = 6;
+        const range = 8;
         for (let offset = -range; offset <= range; offset++) {
           const index = (dragIndex + offset + numSegments + 1) % (numSegments + 1);
-          const falloff = Math.exp(-0.5 * (offset * offset));
+          const falloff = 0.5 * (1 + Math.cos(Math.PI * offset / range));
           radii[index] = baseRadius + (radiusBoost - baseRadius) * falloff;
         }
       }
@@ -184,12 +184,15 @@ function setupUniforms() {
 
 // Physics and geometry update functions
 function updatePhysics() {
-  for (let i = 0; i <= numSegments; i++) {
-    const displacement = radii[i] - baseRadius;
-    const acceleration = -springConstant * displacement - damping * velocities[i];
-    velocities[i] += acceleration;
-    radii[i] += velocities[i];
+  if (!isDragging) {
+    for (let i = 0; i <= numSegments; i++) {
+      const displacement = radii[i] - baseRadius;
+      const acceleration = -springConstant * displacement - damping * velocities[i];
+      velocities[i] += acceleration;
+      radii[i] += velocities[i];
+    }
   }
+  // Always apply spread and smoothing for ripple
   const spreaded = radii.slice();
   for (let i = 0; i <= numSegments; i++) {
     const leftIndex = i === 0 ? numSegments : i - 1;
@@ -206,6 +209,10 @@ function updatePhysics() {
     smoothed[i] = 0.25 * radii[leftIndex] + 0.5 * radii[i] + 0.25 * radii[rightIndex];
   }
   radii.set(smoothed);
+  // Clamp radii to prevent negative values
+  for (let i = 0; i <= numSegments; i++) {
+    radii[i] = Math.max(0, radii[i]);
+  }
 }
 
 function updateVertices() {
