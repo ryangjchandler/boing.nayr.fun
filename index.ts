@@ -8,6 +8,20 @@ const springConstant = 0.12;
 const damping = 0.16;
 const spread = 0.23;
 const devicePixelRatioValue = devicePixelRatio || 1;
+const colorVariants = [
+  "#3fa9f5", // Original blue
+  "#ff0000", // Red
+  "#dc143c", // Crimson
+  "#00ff00", // Lime
+  "#32cd32", // LimeGreen
+  "#ffa500", // Orange
+  "#ff4500", // OrangeRed
+  "#800080", // Purple
+  "#9932cc", // DarkOrchid
+  "#ff69b4", // HotPink
+  "#00ffff", // Cyan
+  "#ffff00"  // Yellow
+];
 
 // Global variables
 let canvas: HTMLCanvasElement;
@@ -164,7 +178,8 @@ function setupUniforms() {
   uniformTime = gl.getUniformLocation(program, "uTime");
   uniformResolution = gl.getUniformLocation(program, "uResolution");
   uniformBaseColor = gl.getUniformLocation(program, "uBaseColor");
-  gl.uniform3fv(uniformBaseColor, new Float32Array(hexToRgbNormalized("#3fa9f5")));
+  const randomColor = colorVariants[Math.floor(Math.random() * colorVariants.length)];
+  gl.uniform3fv(uniformBaseColor, new Float32Array(hexToRgbNormalized(randomColor)));
 }
 
 // Physics and geometry update functions
