@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "bundler",
+        "target": "esnext",
+        "lib": [
+            "DOM",
+            "ESNext"
+        ],
+        "types": [
+            "vite-plugin-glsl/ext"
+        ]
+    }
+}
