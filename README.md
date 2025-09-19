@@ -4,4 +4,5 @@
 
 A Thursday evening creation by [Ryan Chandler](https://ryangjchandler.co.uk?ref=boing.nayr.fun-github).
 
-![A demo of what Boing! looks like.](./art/demo.gif)
+<img src="./art/demo.gif" alt="A demo of what Boing! looks like." width="100%">
+
